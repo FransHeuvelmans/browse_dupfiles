@@ -1,12 +1,12 @@
 """Loads a log file into a dict structure"""
 import logging
-from tqdm import tqdm
+import sys
 from .tree import Node
 
 
 def process_line(log_line):
     """Process a single full log string"""
-    splt = log_line.split(sep=" ", maxsplit=5)
+    splt = log_line.split(maxsplit=5)
     folder_list = splt[-1].split("/")
     return [f.strip() for f in folder_list]
 
@@ -15,22 +15,29 @@ def load_file(file_name):
     """Load a file"""
     total = 0
     log_tree = None
-
+    if (total % 1234) == 0:
+        # sys.stdout.write("Processed {}".format(total))
+        # sys.stdout.flush()
+        print("Processed {}".format(total))
 
     with open(file_name) as bigf:
         started = False
 
-        for line in tqdm(bigf):
+        for line in bigf:
             if started:
                 fldrs = process_line(line)
                 total += 1
+                if (total % 1234 == 0):
+                    print(total, end='\r')
                 if (len(fldrs) == 1) and (fldrs[0] == "."):
                     continue
                 elif log_tree is None:
                     part = Node(fldrs[-1])
                     if len(fldrs) > 1:
                         for fldr in fldrs[-2::-1]:
+                            old_part = part
                             part = Node(name=fldr, contents=[part])
+                            old_part.parent = part
                     log_tree = part
                 else:
                     new_base, left_overs = log_tree.get_leaf(fldrs)
@@ -41,8 +48,11 @@ def load_file(file_name):
                     part = Node(left_overs[-1])
                     if size_left > 1:
                         for lftvr in left_overs[-2::-1]:
+                            old_part = part
                             part = Node(name=lftvr, contents=[part])
+                            old_part.parent = part
                     new_base.contents.append(part)
+                    part.parent = new_base
             else:
                 if "Last full backup date" in line:
                     started = True
