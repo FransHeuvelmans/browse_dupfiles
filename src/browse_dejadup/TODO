@@ -1,0 +1,20 @@
+# TODO list 
+
+## Small things
+* Try using a dict instead of a tree and see what the data-usage is then
+(separate branch)
+
+## Large new features
+
+### Interaction
+* Add a simple cli with fake `cd` `ls` and `ls -a` commands
+* Create ncurses type browser
+* Create a simple gui resembling a normal file-manager
+
+### Performance
+* Use a different datatype to make more valuable use of the space
+(Cython or C bridge perhaps?)
+
+### Function
+* Be able to send a duplicity command that retrieves a particular file
+

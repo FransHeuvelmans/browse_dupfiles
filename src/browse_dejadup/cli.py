@@ -1,5 +1,6 @@
 """Command line interface"""
 import argparse
+import sys
 from browse_dejadup import loader
 
 
@@ -11,4 +12,6 @@ def main():
     )
 
     args = parser.parse_args()
-    print(loader.load_file(args.logfile))
+    num, tree = loader.load_file(args.logfile)
+    #tree.uprint()
+    print(num)
