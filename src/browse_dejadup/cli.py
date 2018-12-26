@@ -1,6 +1,6 @@
 """Command line interface"""
-import argparse
 import sys
+import argparse
 from browse_dejadup import loader
 from browse_dejadup import tree
 
@@ -12,7 +12,7 @@ def promptbrowse(tree):
     def change_dir(dirnm):
         """Change directory"""
         nonlocal tree_pref
-        
+
         # Move on up
         if ".." in dirnm:
             dotlst = dirnm.split("/")
@@ -34,7 +34,7 @@ def promptbrowse(tree):
                 print("Changing to dir ", dirnm)
                 tree_pref = nd
                 return
-            elif dirnm in nd.name:
+            elif dirnm == nd.name[:len(dirnm)]:
                 pos_dirs.append(nd)
         if len(pos_dirs) > 1:
             print("Possible dirs: ", [str(l) for l in pos_dirs])
@@ -75,6 +75,14 @@ def promptbrowse(tree):
         elif rd == "q":
             print("Quitting")
             break
+        elif (rd == "h") or (rd == "help"):
+            print("List of commands:")
+            print("cd .. | dirname : Change directory up or down")
+            print("ls              : List of files/dirs in current dir")
+            print("ll              : List of files/dirs underneath")
+            print("name            : Name of current file/dir")
+            print("pwd             : Current path")
+            print("q               : Quit")
         else:
             print("Unknown command: ", rd)
 
@@ -83,7 +91,7 @@ def main():
     """Main function"""
     parser = argparse.ArgumentParser(description="Browse large duplicity logfiles")
     parser.add_argument(
-        "logfile", metavar="N", type=str, help="an integer for the accumulator"
+        "logfile", type=str, help="duplicity list-current-files outputfile"
     )
 
     args = parser.parse_args()

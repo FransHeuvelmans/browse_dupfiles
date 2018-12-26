@@ -6,7 +6,7 @@
 * Add an option to not add and view the leaf nodes (requires 2 runs)
 * When separating leaf nodes, store full folder paths only as full strings
  (less memory, more )
-* Use well tested libraries (take the non-hobby route)
+* Use well tested libraries (take the non-hobby/non-silly route)
     * Tree library (anytree)
     * graph-db for smaller memory use (graphdb, graphite, cog)
     * Interface libraries (python-prompt-toolkit)
