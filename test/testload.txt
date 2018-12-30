@@ -1,0 +1,26 @@
+Synchronizing remote metadata to local cache...
+Copying duplicity-a.
+Copying duplicity-b.
+Copying duplicity-c.
+Copying duplicity-d.
+Copying duplicity-1.
+Copying duplicity-2.
+Copying duplicity-3.
+Copying duplicity-4.
+Last full backup date: Mon Apr  2 00:14:30 2018
+Mon Apr 30 00:16:45 2018 .
+Tue Sep  5 21:50:49 2017 home
+Mon Apr 30 19:07:53 2018 home/x
+Fri Feb  9 21:44:48 2018 home/x/y
+Mon Apr 30 19:47:45 2018 home/x/y/deja
+Mon Apr 30 19:47:45 2018 home/x/y/deja/dup
+Mon Apr 30 19:47:45 2018 home/x/y/deja/dup/README
+Thu Apr 19 22:58:51 2018 home/x/z
+Wed Jul 12 21:48:24 2017 home/x/z/duplicity
+Sun Jul  9 18:14:04 2017 home/x/z/duplicity/Assignments
+Sat May 20 21:00:34 2017 home/x/z/duplicity/Assignments/1
+Tue Oct  9 19:23:01 2012 home/x/z/duplicity/Assignments/1/2
+Thu Oct  4 01:31:57 2012 home/x/z/duplicity/Assignments/1/2/dataset1.mat
+Tue Oct  9 16:54:27 2012 home/x/z/duplicity/Assignments/1/2/dataset1_ancient_octave.mat
+Thu Oct  4 01:32:12 2012 home/x/z/duplicity/Assignments/1/2/dataset2.mat
+Tue Oct  9 16:55:17 2012 home/x/z/duplicity/Assignments/1/2/dataset2_ancient_octave.mat
