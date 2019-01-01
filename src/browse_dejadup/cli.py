@@ -1,6 +1,7 @@
 """Command line interface"""
 import sys
 import argparse
+import curses
 from browse_dejadup import loader
 from browse_dejadup import tree
 
@@ -34,7 +35,7 @@ def promptbrowse(tree):
                 print("Changing to dir ", dirnm)
                 tree_pref = nd
                 return
-            elif dirnm == nd.name[:len(dirnm)]:
+            elif dirnm == nd.name[: len(dirnm)]:
                 pos_dirs.append(nd)
         if len(pos_dirs) > 1:
             print("Possible dirs: ", [str(l) for l in pos_dirs])
@@ -84,12 +85,140 @@ def promptbrowse(tree):
             print("pwd             : Current path")
             print("q               : Quit")
         else:
-            print("Unknown command: ", rd)
+            print("Unknown command: ", rd, " -- press 'h' for help")
+
+
+def cursesbrowse(stdscr, tree):
+    """A Ncurses style browser for exploring the filetree"""
+    tree_pref = tree
+
+    # Info for drawing the interface
+    contents_loc = [0, 0]  # Option selected
+    windows_loc = 0  # window moved from original position
+    viewinfo = [[], []]  # 2 lists with all the str info
+
+    def draw_obj(y, c, side, num, printlen):
+        """Helper function to draw a single object"""
+        if num >= len(viewinfo[side]):
+            return  # Can't print
+        if contents_loc == [num, side]:
+            stdscr.addstr(y, c, viewinfo[side][num][:printlen], curses.A_STANDOUT)
+        else:
+            stdscr.addstr(y, c, viewinfo[side][num][:printlen])
+
+    def draw_frame():
+        """Draw the data's viewinfo model"""
+        # curses sets some global vars when initialized so disable pylint
+        # pylint: disable=no-member
+        curses.update_lines_cols()
+        curses.curs_set(0)
+        stdscr.clear()
+        half_point = int(curses.COLS / 2)
+        stdscr.vline(0, half_point, "|", curses.LINES - 2)
+
+        l1_len = min(curses.LINES - 2, len(viewinfo[0]))
+        for line in range(l1_len):
+            draw_obj(line, 0, 0, line + windows_loc, half_point)
+
+        l2_len = min(curses.LINES - 2, len(viewinfo[1]))
+        for line in range(l2_len):
+            max_linesize = curses.COLS - half_point - 1
+            draw_obj(line, half_point + 1, 1, line + windows_loc, max_linesize)
+
+        # Put 2 or 3 simple info tips in the lowest position
+        stdscr.hline(curses.LINES - 2, 0, "-", curses.COLS - 1)
+        stdscr.addstr(
+            curses.LINES - 1,
+            0,
+            "q for quit -- arrows to move -- enter to enter"[: curses.COLS - 1],
+        )
+
+        stdscr.refresh()
+
+    def process_enter():
+        """Enter button pressed need to move tree reference"""
+        nonlocal tree_pref
+
+        if tree_pref.parent:
+            # Assume there is a '.'
+            if contents_loc == [0, 0]:
+                tree_pref = tree_pref.parent
+                return
+            else:
+                lst_loc = contents_loc[0] + (contents_loc[1] * len(viewinfo[0])) - 1
+        else:
+            lst_loc = contents_loc[0] + (contents_loc[1] * len(viewinfo[0]))
+        tree_pref = tree_pref.contents[lst_loc]
+
+    def process_input():
+        """Process keyboard input from user"""
+        # pylint: disable=no-member
+        nonlocal contents_loc, windows_loc
+        key = stdscr.getch()
+        if key == ord("q"):
+            return True
+        if key == ord("b"):
+            # Go back (or go to the first option)
+            contents_loc = [0, 0]
+            windows_loc = 0
+            process_enter()
+        elif key == curses.KEY_UP:
+            if contents_loc[0] > 0:
+                if contents_loc[0] == windows_loc:
+                    windows_loc -= 1
+                contents_loc[0] -= 1
+        elif key == curses.KEY_DOWN:
+            if contents_loc[0] < (len(viewinfo[contents_loc[1]]) - 1):
+                if contents_loc[0] == (curses.LINES - 3 + windows_loc):
+                    windows_loc += 1
+                contents_loc[0] += 1
+        elif key == curses.KEY_LEFT:
+            if (contents_loc[1] == 1) and (len(viewinfo[0]) > contents_loc[0]):
+                contents_loc[1] = 0
+        elif key == curses.KEY_RIGHT:
+            if (contents_loc[1] == 0) and (len(viewinfo[1]) > contents_loc[0]):
+                contents_loc[1] = 1
+        elif key == curses.KEY_ENTER or key == 10 or key == 13:
+            process_enter()
+            contents_loc = [0, 0]
+            windows_loc = 0
+        return False
+
+    def fill_viewinfo():
+        """Update the ''model'' of the data (viewdata)"""
+        nonlocal viewinfo
+        left = []
+        if tree_pref.parent:
+            left.append(".")
+        total_child_nodes = len(tree_pref.contents)
+        if total_child_nodes == 0:
+            viewinfo = [left, []]
+            return
+        elif total_child_nodes == 1:
+            left.append(str(tree_pref.contents[0]))
+            viewinfo = [left, []]
+            return
+        else:
+            half = total_child_nodes // 2
+            name_list = [str(nod) for nod in tree_pref.contents]
+            left += name_list[:half]
+            right = name_list[half:]
+            viewinfo = [left, right]
+
+    while True:
+        fill_viewinfo()
+        draw_frame()
+        stop = process_input()
+        if stop:
+            break
 
 
 def main():
     """Main function"""
     parser = argparse.ArgumentParser(description="Browse large duplicity logfiles")
+    parser.add_argument(
+        "--prmpt", action="store_true", help="browse using a command prompt"
+    )
     parser.add_argument(
         "logfile", type=str, help="duplicity list-current-files outputfile"
     )
@@ -97,4 +226,8 @@ def main():
     args = parser.parse_args()
     num, tree = loader.load_file(args.logfile)
     print(num)
-    promptbrowse(tree)
+    if args.prmpt:
+        promptbrowse(tree)
+    else:
+        curses.wrapper(cursesbrowse, tree)
+

@@ -16,7 +16,6 @@
 ## Large new features
 
 ### Interaction
-* Create ncurses type browser
 * Create a simple gui resembling a normal file-manager
 
 ### Performance
@@ -25,4 +24,3 @@
 
 ### Function
 * Be able to send a duplicity command that retrieves a particular file
-
