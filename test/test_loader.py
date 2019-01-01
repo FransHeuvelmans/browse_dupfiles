@@ -28,9 +28,10 @@ def test_loadfile():
 
     assert head_node.name == "home"
     x_node = head_node.contents[0]  # Should load the lines in order
-    assert x_node.name == "x"
+    assert str(x_node) == "x"
     y_node = x_node.contents[0]
-    assert y_node.name == "y"
+    assert str(y_node) == "y"
     z_node = x_node.contents[1]
-    assert z_node.name == "z"
-    assert z_node.contents[0].contents[0].contents[0].contents[0].name == "2"
+    assert str(z_node) == "z"
+    assign1_node = z_node.contents[0].contents[0].contents[0]
+    assert str(assign1_node.contents[0]) == "2"

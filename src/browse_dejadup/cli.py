@@ -3,7 +3,7 @@ import sys
 import argparse
 import curses
 from browse_dejadup import loader
-from browse_dejadup import tree
+from browse_dejadup.tree import Node
 
 
 def promptbrowse(tree):
@@ -31,19 +31,27 @@ def promptbrowse(tree):
         # Go further down
         pos_dirs = []
         for nd in tree_pref.contents:
-            if nd.name == dirnm:
-                print("Changing to dir ", dirnm)
-                tree_pref = nd
-                return
-            elif dirnm == nd.name[: len(dirnm)]:
+            if str(nd) == dirnm:
+                if type(nd) == Node:
+                    print("Changing to dir ", dirnm)
+                    tree_pref = nd
+                    return
+                else:
+                    print(dirnm, " is not a directory")
+                    return
+            elif dirnm == str(nd)[: len(dirnm)]:
                 pos_dirs.append(nd)
         if len(pos_dirs) > 1:
             print("Possible dirs: ", [str(l) for l in pos_dirs])
             return
-        elif pos_dirs:
-            print("Changing to dir ", pos_dirs[0])
-            tree_pref = pos_dirs[0]
-            return
+        if pos_dirs:
+            if type(pos_dirs[0]) == Node:
+                print("Changing to dir ", pos_dirs[0])
+                tree_pref = pos_dirs[0]
+                return
+            else:
+                print("Possible loc ", pos_dirs[0], " is not a dir")
+                return
         print("Node not found ", dirnm)
 
     while True:
@@ -59,7 +67,7 @@ def promptbrowse(tree):
             # Nothing done with all the other dirs mentioned
         # list files
         elif rd == "ls":
-            print([l.name for l in tree_pref.contents])
+            print([str(l) for l in tree_pref.contents])
         elif rd == "ll":
             for l in tree_pref.contents:
                 print(l)
@@ -67,10 +75,10 @@ def promptbrowse(tree):
             print(tree_pref)
         elif rd == "pwd":
             loc = tree_pref
-            full_str = loc.name
+            full_str = str(loc)
             while loc.parent:
                 loc = loc.parent
-                full_str = loc.name + "/" + full_str
+                full_str = str(loc) + "/" + full_str
             print(full_str)
         # quit
         elif rd == "q":
@@ -148,7 +156,8 @@ def cursesbrowse(stdscr, tree):
                 lst_loc = contents_loc[0] + (contents_loc[1] * len(viewinfo[0])) - 1
         else:
             lst_loc = contents_loc[0] + (contents_loc[1] * len(viewinfo[0]))
-        tree_pref = tree_pref.contents[lst_loc]
+        if type(tree_pref.contents[lst_loc]) == Node:
+            tree_pref = tree_pref.contents[lst_loc]
 
     def process_input():
         """Process keyboard input from user"""
