@@ -1,7 +1,7 @@
 """Loads a log file into a dict structure"""
 import logging
 import sys
-from browse_dejadup.tree import Node
+from browse_dupfiles.tree import Node
 
 
 def process_line(log_line):

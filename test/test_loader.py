@@ -1,4 +1,4 @@
-from browse_dejadup import loader
+from browse_dupfiles import loader
 
 
 def test_line_processing():

@@ -1,4 +1,4 @@
-from browse_dejadup.tree import Node
+from browse_dupfiles.tree import Node
 
 
 def test_sample_tree():

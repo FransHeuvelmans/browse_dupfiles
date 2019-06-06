@@ -2,8 +2,8 @@
 import sys
 import argparse
 import curses
-from browse_dejadup import loader
-from browse_dejadup.tree import Node
+from browse_dupfiles import loader
+from browse_dupfiles.tree import Node
 
 
 def promptbrowse(tree):
@@ -104,6 +104,12 @@ def cursesbrowse(stdscr, tree):
     contents_loc = [0, 0]  # Option selected
     windows_loc = 0  # window moved from original position
     viewinfo = [[], []]  # 2 lists with all the str info
+    help_info = [
+        "q for quit",
+        "arrows to move",
+        "enter to enter",
+        "b for back",
+    ]
 
     def draw_obj(y, c, side, num, printlen):
         """Helper function to draw a single object"""
@@ -138,7 +144,7 @@ def cursesbrowse(stdscr, tree):
         stdscr.addstr(
             curses.LINES - 1,
             0,
-            "q for quit -- arrows to move -- enter to enter"[: curses.COLS - 1],
+            " - ".join(help_info)[: curses.COLS - 1],
         )
 
         stdscr.refresh()
@@ -156,8 +162,11 @@ def cursesbrowse(stdscr, tree):
                 lst_loc = contents_loc[0] + (contents_loc[1] * len(viewinfo[0])) - 1
         else:
             lst_loc = contents_loc[0] + (contents_loc[1] * len(viewinfo[0]))
-        if type(tree_pref.contents[lst_loc]) == Node:
+        possible_node = tree_pref.contents[lst_loc]
+        if type(possible_node) == Node and len(possible_node.contents) > 0:
             tree_pref = tree_pref.contents[lst_loc]
+            return True
+        return False
 
     def process_input():
         """Process keyboard input from user"""
@@ -188,9 +197,10 @@ def cursesbrowse(stdscr, tree):
             if (contents_loc[1] == 0) and (len(viewinfo[1]) > contents_loc[0]):
                 contents_loc[1] = 1
         elif key == curses.KEY_ENTER or key == 10 or key == 13:
-            process_enter()
-            contents_loc = [0, 0]
-            windows_loc = 0
+            success = process_enter()
+            if success:
+                contents_loc = [0, 0]
+                windows_loc = 0
         return False
 
     def fill_viewinfo():
@@ -209,7 +219,12 @@ def cursesbrowse(stdscr, tree):
             return
         else:
             half = total_child_nodes // 2
-            name_list = [str(nod) for nod in tree_pref.contents]
+            name_list = []
+            for nod in tree_pref.contents:
+                if len(nod.contents) > 0:
+                    name_list.append(str(nod) + "/")
+                else:
+                    name_list.append(str(nod))
             left += name_list[:half]
             right = name_list[half:]
             viewinfo = [left, right]

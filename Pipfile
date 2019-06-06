@@ -4,12 +4,12 @@ verify_ssl = true
 name = "pypi"
 
 [requires]
-python_version = "3.6"
+python_version = "3.7"
 
 [packages]
 e1839a8 = {path = ".",editable = true}
 
 [dev-packages]
-black = "*"
 pylint = "*"
 rope = "*"
+pytest = "*"
